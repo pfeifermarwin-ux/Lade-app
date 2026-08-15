@@ -1,0 +1,4 @@
+requests
+tkintermapview
+CTkMessagebox
+customtkinter

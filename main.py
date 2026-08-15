@@ -18,43 +18,7 @@ def selectLocationMessageBox():
             setTab("map")
 
 def lade_und_platziere_marker():
-    try:
-        url = "https://bund.dev"
-        
-        headers = {
-            "User-Agent": "MeinLadesaeulenFinderApp/1.0 (Kontakt: meinprojekt@example.com)"
-        }
-        
-        antwort = requests.get(url, headers=headers, timeout=15)
-        
-        if antwort.status_code != 200:
-            print(f"Server-Fehler! Status-Code: {antwort.status_code}")
-            print("Server-Antwort:", antwort.text[:200])
-            return
-            
-        ladesaeulen = antwort.json()
-        
-        gesetzte_marker = 0
-        for saeule in ladesaeulen[:500]:
-            lat = saeule.get("latitude")
-            lon = saeule.get("longitude")
-            betreiber = saeule.get("operator", "Unbekannter Betreiber")
-            ort = saeule.get("city", "")
-            
-            if lat and lon:
-                chargeMap.set_marker(
-                    lat, 
-                    lon, 
-                    text=f"{betreiber}\n{ort}"
-                )
-                gesetzte_marker += 1
-                
-        print(f"Erfolgreich {gesetzte_marker} Marker auf der Karte platziert.")
-        
-    except requests.exceptions.JSONDecodeError:
-        print("Fehler: Der Server hat kein gültiges JSON gesendet. Eventuell ist die API temporär überlastet.")
-    except Exception as e:
-        print("Anderer Fehler beim Laden:", e)
+    pass
 
 tabview = ctk.CTkTabview(master=app)
 tabview.pack(fill="both", expand=True)
