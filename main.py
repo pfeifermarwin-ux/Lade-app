@@ -15,13 +15,20 @@ def setTab(tab: str):
         DashComboCallback(DashListSelect.get())
     if tab == "addCharge":
         listSelect.configure(values=[f"{list[1]}" for list in loadLists()])
+        addChargeComboCallback(listSelect.get())
 
 def selectLocationMessageBox():
     msg = CTkMessagebox(icon="question", option_1="Zuhause", option_2="Ladesäule", title="Ortauswahl", message="Bitteauswählen")
     if msg.get() == "Ladesäule":
         msg = CTkMessagebox(icon="question", option_1="Karte öffnen", option_2="eigene eingeben", title=" ", message="Bitteauswählen")
         if msg.get() == "Karte öffnen":
-            setTab("map")
+            #setTab("map")
+            CTkMessagebox(icon="info", title="Info", message="Noch nicht implementiert")
+        if msg.get() == "eigene eingeben":
+            dialog = ctk.CTkInputDialog(text="Bitte Ort eingeben:", title="Ort eingeben")
+            locationLabel.configure(text=f"Ort: {dialog.get_input()}")
+    if msg.get() == "Zuhause":
+        locationLabel.configure(text=f"Ort: Zuhause")
 
 def lade_und_platziere_marker():
     pass
@@ -129,6 +136,8 @@ def deleteList(listName):
             DashListSelect.set("")
         DashComboCallback(DashListSelect.get())
 
+initialiseDatabase()
+
 tabview = ctk.CTkTabview(master=app)
 tabview.pack(fill="both", expand=True)
 tabview.add("addCharge")
@@ -191,7 +200,7 @@ addChargeaddBTN = ctk.CTkButton(master=tabview.tab("addCharge"), text="Add", com
     batteryChargeAfterCharge.get(),
     chargedKwIN.get(),
     chargePrice.get(),
-    "None",
+    locationLabel.cget("text").replace("Ort: ", ""),
     int(chargeCurrentKilometerIn.get()) - int(getLastMileage(loadListByName(listSelect.get())[0]))
 ))
 addChargeaddBTN.pack()
@@ -218,6 +227,5 @@ chargeMap.set_position(51.1657, 10.4515)
 chargeMap.set_zoom(6)
 app.after(500, lade_und_platziere_marker)
 
-initialiseDatabase()
 
 app.mainloop()
