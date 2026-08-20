@@ -195,11 +195,11 @@ def updater_finished():
         updaterApp.destroy()
         return
     updaterApp.destroy()
-    app.destroy()
     subprocess.Popen(["updater.exe", "--current-programm", CurrentProgramPath, "--new-version", new_version])
+    app.quit()
 def stopUpdater():
     updaterApp.destroy()
-    app.destroy()
+    app.quit()
 
 initialiseDatabase()
 
