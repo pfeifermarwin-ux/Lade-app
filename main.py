@@ -4,6 +4,8 @@ import requests
 import tkintermapview
 import sqlite3
 
+VERSION = "0.1" #dont change
+
 app = ctk.CTk()
 app.title("Ladeapp")
 app.geometry("800x500")
@@ -136,6 +138,15 @@ def deleteList(listName):
             DashListSelect.set("")
         DashComboCallback(DashListSelect.get())
 
+def releaseRequest():
+    try:
+        response = requests.get("https://github.com/pfeifermarwin-ux/Lade-app/releases", headers={"Accept": "application/vnd.github.v3+json"})
+        releases = response.json()
+        for release in releases:
+            print(f"Version: {release['tag_name']} - Name: {release['name']}")
+    except Exception as e:
+        print(f"Error fetching releases: {e}")
+
 initialiseDatabase()
 
 tabview = ctk.CTkTabview(master=app)
@@ -227,5 +238,11 @@ chargeMap.set_position(51.1657, 10.4515)
 chargeMap.set_zoom(6)
 app.after(500, lade_und_platziere_marker)
 
+#updater
 
-app.mainloop()
+#
+
+releaseRequest()
+#app.mainloop()
+
+
