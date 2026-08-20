@@ -178,7 +178,10 @@ def downloadUpdater():
                 f.write(chunk)
                 downloaded += len(chunk)
                 if total:
-                    updaterApp.after(0, lambda: progressBar.set(downloaded / total))
+                    updaterApp.after(
+                        0,
+                        lambda value=downloaded / total: progressBar.set(value)
+                    )
     updaterApp.after(0, updater_finished)
 
 def updater_finished():
@@ -192,9 +195,11 @@ def updater_finished():
         updaterApp.destroy()
         return
     updaterApp.destroy()
+    app.destroy()
     subprocess.Popen(["updater.exe", "--current-programm", CurrentProgramPath, "--new-version", new_version])
 def stopUpdater():
     updaterApp.destroy()
+    app.destroy()
 
 initialiseDatabase()
 
