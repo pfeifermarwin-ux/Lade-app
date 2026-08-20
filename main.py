@@ -1,10 +1,14 @@
+import os
+import subprocess
+import sys
+import threading
 from CTkMessagebox import CTkMessagebox
 import customtkinter as ctk
 import requests
 import tkintermapview
 import sqlite3
 
-VERSION = "0.1" #dont change
+VERSION = "v.0.0.0" #dont change
 
 app = ctk.CTk()
 app.title("Ladeapp")
@@ -140,12 +144,57 @@ def deleteList(listName):
 
 def releaseRequest():
     try:
-        response = requests.get("https://github.com/pfeifermarwin-ux/Lade-app/releases", headers={"Accept": "application/vnd.github.v3+json"})
-        releases = response.json()
-        for release in releases:
-            print(f"Version: {release['tag_name']} - Name: {release['name']}")
+        response = requests.get("https://api.github.com/repos/pfeifermarwin-ux/Lade-app/releases",)
+        release = response.json()[0]
+        return release['tag_name']
     except Exception as e:
         print(f"Error fetching releases: {e}")
+
+def downloadUpdater():
+    release = requests.get("https://api.github.com/repos/pfeifermarwin-ux/Lade-app/releases").json()[0]
+    for asset in release["assets"]:
+        if asset["name"] == "updater.exe":
+            updater_url = asset["browser_download_url"]
+            break
+    else:
+        updaterApp.after(
+            0,
+            lambda: CTkMessagebox(
+                icon="cancel",
+                title="Update Error",
+                message="Der Updater konnte nicht gefunden werden."
+            )
+        )
+        updaterApp.after(100, stopUpdater)
+        return
+
+    response = requests.get(updater_url, stream=True)
+    response.raise_for_status()
+    total = int(response.headers.get("content-length", 0))
+    downloaded = 0
+    with open("updater.exe", "wb") as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            if chunk:
+                f.write(chunk)
+                downloaded += len(chunk)
+                if total:
+                    updaterApp.after(0, lambda: progressBar.set(downloaded / total))
+    updaterApp.after(0, updater_finished)
+
+def updater_finished():
+    if getattr(sys, "frozen", False):
+        CurrentProgramPath = os.path.abspath(sys.executable)
+    else:
+        CurrentProgramPath = os.path.abspath(__file__)
+    new_version = releaseRequest()
+
+    if new_version is None:
+        updaterApp.destroy()
+        return
+    updaterApp.destroy()
+    subprocess.Popen(["updater.exe", "--current-programm", CurrentProgramPath, "--new-version", new_version])
+def stopUpdater():
+    updaterApp.destroy()
 
 initialiseDatabase()
 
@@ -240,9 +289,22 @@ app.after(500, lade_und_platziere_marker)
 
 #updater
 
-#
+updaterApp = ctk.CTk()
+updaterApp.title("Updater")
+updaterApp.geometry("400x200")
 
-releaseRequest()
-#app.mainloop()
+ctk.CTkLabel(master=updaterApp, text="Download Updater").pack(pady=20)
+progressBar = ctk.CTkProgressBar(master=updaterApp, orientation="horizontal", mode="determinate")
+progressBar.pack(pady=20)
+
+if releaseRequest() != VERSION:
+    msg = CTkMessagebox(icon="info", option_1="Update", option_2="Cancel", title="Update Available", message=f"Version {releaseRequest()} is available. You are currently on version {VERSION}.")
+    if msg.get() == "Update":
+        threading.Thread(target=downloadUpdater, daemon=True).start()
+        updaterApp.mainloop()
+    else:
+        app.mainloop()
+else:
+    app.mainloop()
 
 
