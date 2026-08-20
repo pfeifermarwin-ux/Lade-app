@@ -1,5 +1,4 @@
 # Lade-app
 
-
-## <span style="color: red;">do not download</span>
+$${\color{red}\textsf{\textbf{do not download}}}$$
 
